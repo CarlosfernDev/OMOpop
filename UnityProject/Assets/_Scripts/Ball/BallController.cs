@@ -63,7 +63,7 @@ public class BallController : MonoBehaviour
                 DeadZoneCollision(collision.gameObject);
                 break;
             case 3:
-
+                BrickCollision(collision.gameObject);
                 break;
         }
     }
@@ -98,6 +98,16 @@ public class BallController : MonoBehaviour
     {
         _rb.velocity = Vector2.zero;
         Spawn();
+    }
+
+    private void BrickCollision(GameObject P)
+    {
+        // Invertir la velocidad en el eje Y
+        
+
+        // Activar la funcion del bloque 
+
+        // Script del bloque no poner aqui, Funcion publica de restar vida y que compruebe la vida del bloque y otra donde lo haga desaparecer.
     }
 
     private void LearnDictionaryTags()
