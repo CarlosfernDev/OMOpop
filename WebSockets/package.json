@@ -1,0 +1,15 @@
+{
+  "name": "rtm",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "nodemon": "^3.0.2",
+    "ws": "^8.14.2"
+  }
+}
