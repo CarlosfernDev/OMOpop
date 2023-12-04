@@ -1,0 +1,6 @@
+Game loop.
+
+- Menú del juego
+- Lobby buscar partida 1 vs 1 // buscar partida Battle Royale (Opcional) (Lobby Donde se van metiendo las conexiones)
+- Partida: 1 vs 1 (Se van rompiendo cubos los cuales se van poniendo al oponente, cuando los cubos superen la movilidad de la barra o alguno se haya quedado sin bloques en su partida, el jugador queda eliminado, o resulta ganador)
+- Resultado final con el ganador y boton de volver al lobby.
