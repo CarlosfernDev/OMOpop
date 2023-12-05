@@ -63,7 +63,7 @@ public class BallController : MonoBehaviour
                 DeadZoneCollision(collision.gameObject);
                 break;
             case 3:
-                BrickCollision(collision.gameObject);
+                BrickCollision(collision.gameObject, collision.ClosestPoint(transform.position));
                 break;
         }
     }
@@ -100,14 +100,19 @@ public class BallController : MonoBehaviour
         Spawn();
     }
 
-    private void BrickCollision(GameObject P)
+    private void BrickCollision(GameObject P, Vector2 HitPosition)
     {
         // Invertir la velocidad en el eje Y
-        
+
 
         // Activar la funcion del bloque 
 
         // Script del bloque no poner aqui, Funcion publica de restar vida y que compruebe la vida del bloque y otra donde lo haga desaparecer.
+
+
+        _rb.velocity = new Vector2(-Mathf.Sign(HitPosition.x - transform.position.x)  * Mathf.Abs(_rb.velocity.x), -Mathf.Sign(HitPosition.y - transform.position.y) * Mathf.Abs(_rb.velocity.y));
+        P.GetComponent<BlockLogic>().RestarVida(1);
+
     }
 
     private void LearnDictionaryTags()

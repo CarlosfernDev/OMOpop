@@ -15,25 +15,20 @@ public class BlockLogic : MonoBehaviour
         vidaActual = vidaMaxima;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    /*private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Pelota"))
         {
             RestarVida();
             comprobarVida();
         }
-    }
+    }*/
 
-    public void RomperBloque()
-    {
-        Debug.Log("Bloque roto");
-        Destroy(gameObject);
-    }
-
-    public void RestarVida()
+    public void RestarVida(int value)
     {
         // Restar vida al bloque
-        vidaActual--;
+        vidaActual -= value;
+        comprobarVida();
     }
 
     public void comprobarVida()
@@ -43,5 +38,11 @@ public class BlockLogic : MonoBehaviour
         {
             RomperBloque();
         }
+    }
+
+    public void RomperBloque()
+    {
+        Debug.Log("Bloque roto");
+        Destroy(gameObject);
     }
 }
