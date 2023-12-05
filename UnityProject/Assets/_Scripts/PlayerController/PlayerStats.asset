@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f7d95a446c3872428af62de85294f3e, type: 3}
   m_Name: PlayerStats
   m_EditorClassIdentifier: 
-  speed: 22
-  smoothTime: 0.05
+  speed: 8
+  smoothTime: 0.1
   scale: {x: 1.66, y: 0.23}
   predictRaycastDistance: 0.34
   wallLayer:

@@ -45,6 +45,6 @@ public class BlockLogic : MonoBehaviour
     public void RomperBloque()
     {
         Debug.Log("Bloque roto");
-        Destroy(gameObject);
+        gameObject.SetActive(false);
     }
 }

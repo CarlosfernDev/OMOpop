@@ -27,10 +27,13 @@ public class BallController : MonoBehaviour
         //Launch();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void FixedUpdate()
     {
-        
+        if (!isLaunched)
+            return;
+
+        _rb.velocity = new Vector2(Mathf.Sign(_rb.velocity.x) * Mathf.Clamp(Mathf.Abs(_rb.velocity.x),0.5f, _BallStats.initialSpeed - 0.5f), 
+            Mathf.Sign(_rb.velocity.y) * Mathf.Clamp(Mathf.Abs(_rb.velocity.y), 0.5f, _BallStats.initialSpeed - 0.5f));
     }
 
     public void Launch()
@@ -43,8 +46,8 @@ public class BallController : MonoBehaviour
         _rb.isKinematic = false;
         transform.parent = null;
 
-        _Velocity.x = 1;
-        _Velocity.y = 1;
+        _Velocity.x = 0.35f;
+        _Velocity.y = 0.65f;
         _Velocity = _Velocity * _BallStats.initialSpeed;
         _rb.velocity = _Velocity;
     }
@@ -68,6 +71,19 @@ public class BallController : MonoBehaviour
         }
     }
 
+    //private void OnCollisionEnter2D(Collision2D collision)
+    //{
+    //    if (!_tagDictionary.ContainsKey(collision.transform.tag))
+    //        return;
+
+    //    switch (_tagDictionary[collision.transform.tag])
+    //    {
+    //        case 3:
+    //            //BrickCollision(collision.gameObject);
+    //            break;
+    //    }
+    //}
+
     private void Spawn()
     {
         isLaunched = false;
@@ -84,14 +100,14 @@ public class BallController : MonoBehaviour
 
         PlayerController pc = P.GetComponent<PlayerController>();
 
-        float DeltaHitPosition = P.transform.position.x - HitPosition.x;
+        float DeltaHitPosition = HitPosition.x - P.transform.position.x;
         float angleIncision = (DeltaHitPosition / (pc._PlayerStats.scale.x/2)) * _BallStats.maxAngle;
 
         float SymbolX = P.GetComponent<PlayerController>()._InputAxisValue.x;
-        Debug.Log(angleIncision);
-        Debug.Log(Mathf.Sin(Mathf.Deg2Rad * angleIncision));
+        //Debug.Log(angleIncision);
+        //Debug.Log(Mathf.Sin(angleIncision));
         //_rb.velocity = new Vector2(((SymbolX != 0) ? (Mathf.Sign(SymbolX) * Mathf.Abs(_rb.velocity.x)) : _rb.velocity.x), (-MathF.Sign(P.transform.position.y)) * Mathf.Abs(_rb.velocity.y));
-        _rb.velocity = new Vector2(Mathf.Sin(Mathf.Deg2Rad * angleIncision) * -_BallStats.initialSpeed, Mathf.Cos(Mathf.Deg2Rad * angleIncision) * ((-MathF.Sign(P.transform.position.y)) * _BallStats.initialSpeed));
+        _rb.velocity = new Vector2(Mathf.Sin(Mathf.Deg2Rad * angleIncision) * _BallStats.initialSpeed, (1 - Mathf.Abs(Mathf.Sin(Mathf.Deg2Rad * angleIncision))) * ((-MathF.Sign(P.transform.position.y)) * _BallStats.initialSpeed));
     }
 
     private void DeadZoneCollision(GameObject P)
@@ -109,8 +125,18 @@ public class BallController : MonoBehaviour
 
         // Script del bloque no poner aqui, Funcion publica de restar vida y que compruebe la vida del bloque y otra donde lo haga desaparecer.
 
+        Debug.Log(Mathf.Abs((HitPosition.y - P.transform.position.y)) > (P.transform.localScale.y/2) - 0.057);
+        Debug.Log(Mathf.Abs((HitPosition.y - P.transform.position.y)));
+        if(Mathf.Abs((HitPosition.y - P.transform.position.y)) > (P.transform.localScale.y / 2) - 0.057)
+        {
+            _rb.velocity = new Vector2(_rb.velocity.x, -Mathf.Sign(HitPosition.y - transform.position.y) * Mathf.Abs(_rb.velocity.y));
+        }
+        else
+        {
+            _rb.velocity = new Vector2(-Mathf.Sign(HitPosition.x - transform.position.x) * Mathf.Abs(_rb.velocity.x), _rb.velocity.y);
+        }
 
-        _rb.velocity = new Vector2(-Mathf.Sign(HitPosition.x - transform.position.x)  * Mathf.Abs(_rb.velocity.x), -Mathf.Sign(HitPosition.y - transform.position.y) * Mathf.Abs(_rb.velocity.y));
+
         P.GetComponent<BlockLogic>().RestarVida(1);
 
     }
