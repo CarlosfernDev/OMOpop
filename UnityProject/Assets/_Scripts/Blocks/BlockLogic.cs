@@ -7,6 +7,8 @@ public class BlockLogic : MonoBehaviour
     public int vidaMaxima = 1; // Puedes ajustar la vida inicial del bloque
     private int vidaActual;
 
+    public string ID;
+
 
     //Funcion publica de restar vida y que compruebe la vida del bloque y otra donde lo haga desaparecer.
 
