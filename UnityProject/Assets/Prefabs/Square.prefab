@@ -336,6 +336,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vidaMaxima: 1
+  ID: 
 --- !u!61 &7124479984751153326
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -345,7 +346,7 @@ BoxCollider2D:
   m_GameObject: {fileID: 7479417553512829049}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 0ba1ac13bfcd9fa41becf813f246fce6, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
