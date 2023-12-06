@@ -12,6 +12,7 @@ public class BallController : MonoBehaviour
     [SerializeField] private BallStats _BallStats;
     [SerializeField] private Rigidbody2D _rb;
     private Vector2 _Velocity;
+    private bool _IHit;
 
     bool isLaunched = false;
 
@@ -25,6 +26,15 @@ public class BallController : MonoBehaviour
     {
         Spawn();
         //Launch();
+    }
+
+    
+    private void LateUpdate()
+    {
+        if (!isLaunched)
+            return;
+
+        _IHit = false;
     }
 
     private void FixedUpdate()
@@ -54,6 +64,7 @@ public class BallController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+
         if (!_tagDictionary.ContainsKey(collision.tag))
             return;
 
@@ -65,6 +76,19 @@ public class BallController : MonoBehaviour
             case 2:
                 DeadZoneCollision(collision.gameObject);
                 break;
+            case 3:
+                BrickCollision(collision.gameObject, collision.ClosestPoint(transform.position));
+                break;
+        }
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+            if (!_tagDictionary.ContainsKey(collision.transform.tag))
+                return;
+
+        switch (_tagDictionary[collision.tag])
+        {
             case 3:
                 BrickCollision(collision.gameObject, collision.ClosestPoint(transform.position));
                 break;
@@ -118,6 +142,11 @@ public class BallController : MonoBehaviour
 
     private void BrickCollision(GameObject P, Vector2 HitPosition)
     {
+        if (_IHit)
+            return;
+
+        _IHit = true;
+
         // Invertir la velocidad en el eje Y
 
 
@@ -127,13 +156,13 @@ public class BallController : MonoBehaviour
 
         Debug.Log(Mathf.Abs((HitPosition.y - P.transform.position.y)) > (P.transform.localScale.y/2) - 0.057);
         Debug.Log(Mathf.Abs((HitPosition.y - P.transform.position.y)));
-        if(Mathf.Abs((HitPosition.y - P.transform.position.y)) > (P.transform.localScale.y / 2) - 0.057)
+        if(Mathf.Abs((HitPosition.y - P.transform.position.y)) > (P.transform.localScale.y / 2) - 0.047)
         {
-            _rb.velocity = new Vector2(_rb.velocity.x, -Mathf.Sign(HitPosition.y - transform.position.y) * Mathf.Abs(_rb.velocity.y));
+            _rb.velocity = new Vector2(_rb.velocity.x, Mathf.Sign(HitPosition.y - P.transform.position.y) * Mathf.Abs(_rb.velocity.y));
         }
         else
         {
-            _rb.velocity = new Vector2(-Mathf.Sign(HitPosition.x - transform.position.x) * Mathf.Abs(_rb.velocity.x), _rb.velocity.y);
+            _rb.velocity = new Vector2(Mathf.Sign(HitPosition.x - P.transform.position.x) * Mathf.Abs(_rb.velocity.x), _rb.velocity.y);
         }
 
 
