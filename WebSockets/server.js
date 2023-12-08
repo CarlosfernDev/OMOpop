@@ -1,31 +1,43 @@
 const WebSocket = require("ws");
 
-const miServidor = new WebSocket.Server({port:3000}, () => {
-    console.log("Servidor WebSocket iniciado en el puerto 3000...")
-});
+miservidor = new WebSocket.Server(
+	{port:3000},
+	aliniciar
+);
+function aliniciar() {
+	console.log("servidor iniciado");
+}
 
-var conexiones = [];
+var conexiones=[];
 
-miServidor.on("connection", (socket) =>{
-    conexiones.push[socket];
+miservidor.on("connection", alguienconectado);
+function alguienconectado(conexionconcliente) {
+	conexiones.push(conexionconcliente);
+	console.log("nueva conexion: conectados "+conexiones.length);
+	conexionconcliente.send("bienvenido");
 
-        console.log("alguien se ha conectado, ya somos "+conexiones.length);
-    socket.send("Hola eres el wacho: " + conexiones.length);
+	conexionconcliente.on("message", 
+		function (data) {
+			console.log(data.toString());
+			//conexionconcliente.send(data.toString());
+			var i = clamp(Math.floor(Math.random() * conexiones.length),0,1000)
+            conexiones.forEach(c => {if(c == conexiones[i])conexiones[i].send(data.toString())});
+		}
+	);
 
-    socket.on("close", ()=>{
-        conexiones.filter((c)=>{c!=socket});
-        conexiones.forEach((s)=>s.send("Alguien se ha ido"));
-        console.log("alguien ha cerrado las conexiones");
-    });
-
-    socket.on("message", (datos)=>{
-        console.log("Me han enviado esto: "+ datos.toString())
-        socket.send(datos.toString());
-        //conexiones[getRandomInt(conexiones.length - 1)].send(datos)
-        //conexiones.forEach((s)=>{if(s!=socket)s.send(datos.toString())});
-    })
-})
-
+	conexionconcliente.on("close", 
+		function() {
+			conexiones = conexiones.filter(
+				(c)=>{
+					return c!=conexionconcliente
+				}
+			);	
+			console.log("conexion cerrara: conectados "+conexiones.length);
+		}
+	);
+}
 function getRandomInt(max) {
     return Math.floor(Math.random() * max);
   }
+
+  const clamp = (val, min, max) => Math.min(Math.max(val, min), max)

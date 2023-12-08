@@ -4,15 +4,27 @@ using UnityEngine;
 
 public class TileBlock : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    static public Dictionary<int, BlockLogic> BlockIdDictionary;
+
+    private void Awake()
     {
-        
+        startDictionary(); 
     }
 
-    // Update is called once per frame
-    void Update()
+    void startDictionary()
     {
-        
+        BlockIdDictionary = new Dictionary<int, BlockLogic>();
+    }
+
+    static public void AddID(int ID, BlockLogic value)
+    {
+        if (!BlockIdDictionary.ContainsKey(ID))
+        {
+            BlockIdDictionary.Add(ID, value);
+        }
+        else
+        {
+            Debug.LogWarning("La ID: " + ID + " existe en " + value.gameObject.name);
+        }
     }
 }

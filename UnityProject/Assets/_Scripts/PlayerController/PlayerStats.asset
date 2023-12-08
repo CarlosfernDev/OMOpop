@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 8
   smoothTime: 0.1
-  scale: {x: 1.66, y: 0.23}
+  scale: {x: 1.32, y: 0.23}
   predictRaycastDistance: 0.34
   wallLayer:
     serializedVersion: 2

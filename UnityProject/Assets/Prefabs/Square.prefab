@@ -336,7 +336,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vidaMaxima: 1
-  ID: 
+  ID: 0
+  CanISend: 1
+  _Text: {fileID: 5526601842520520019}
 --- !u!61 &7124479984751153326
 BoxCollider2D:
   m_ObjectHideFlags: 0

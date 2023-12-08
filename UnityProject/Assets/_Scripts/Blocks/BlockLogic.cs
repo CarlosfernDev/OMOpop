@@ -1,20 +1,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class BlockLogic : MonoBehaviour
 {
     public int vidaMaxima = 1; // Puedes ajustar la vida inicial del bloque
     private int vidaActual;
 
-    public string ID;
+    public int ID;
 
+    [HideInInspector]public bool CanISend = true;
+
+    [SerializeField] private TMP_Text _Text;
 
     //Funcion publica de restar vida y que compruebe la vida del bloque y otra donde lo haga desaparecer.
 
     private void Start()
     {
+        TileBlock.AddID(ID,this);
         vidaActual = vidaMaxima;
+        _Text.text = vidaActual.ToString();
+    }
+
+    private void OnEnable()
+    {
+        vidaActual = vidaMaxima;
+        _Text.text = vidaActual.ToString();
     }
 
     /*private void OnCollisionEnter(Collision collision)
@@ -26,10 +38,18 @@ public class BlockLogic : MonoBehaviour
         }
     }*/
 
+    public void AddVida(int value)
+    {
+        vidaActual = Mathf.Clamp(vidaActual + value, 0, 999);
+        _Text.text = vidaActual.ToString();
+        comprobarVida();
+    }
+
     public void RestarVida(int value)
     {
         // Restar vida al bloque
-        vidaActual -= value;
+        vidaActual = Mathf.Clamp(vidaActual - value,0,999);
+        _Text.text = vidaActual.ToString();
         comprobarVida();
     }
 
@@ -46,5 +66,13 @@ public class BlockLogic : MonoBehaviour
     {
         Debug.Log("Bloque roto");
         gameObject.SetActive(false);
+        DataSend Message = new DataSend();
+        Message.BlockID = ID;
+        Message.RoomID = 0;
+
+        if (!CanISend)
+            return;
+
+        WebSocketManager.Instance.SendBlock(Message);
     }
 }
