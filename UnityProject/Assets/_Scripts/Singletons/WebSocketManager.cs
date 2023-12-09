@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using WebSocketSharp;
 
-public class DataSend
+public class SendBlock
 {
     public int RoomID;
     public int BlockID;
@@ -13,13 +13,7 @@ public class DataSend
 public class Data
 {
     public string action = " ";
-    /*string payload = new
-    {
-        int playerID = "";
-    int roomID = "";
-    int playerName = "";
-    int message = "";
-    };*/
+    public string Json;
 }
 
 public class WebSocketManager : MonoBehaviour
@@ -29,10 +23,11 @@ public class WebSocketManager : MonoBehaviour
     public Action OnWebSocketInstance;
 
     WebSocketSharp.WebSocket ws;
-    public DataSend misDatos;
+    public Data misDatos;
 
-    [SerializeField] private DataSend testDatos;
+    [SerializeField] private SendBlock testDatos;
 
+    #region UnityFunctions
     private void Awake()
     {
         Instance = this;
@@ -59,11 +54,9 @@ public class WebSocketManager : MonoBehaviour
     {
         ws.Close();
     }
+    #endregion
 
-    public void SendBlock(DataSend value)
-    {
-        ws.Send(JsonUtility.ToJson(value));
-    }
+    #region SendMessage
 
     public void onSendMessageToAll()
     {
@@ -72,19 +65,58 @@ public class WebSocketManager : MonoBehaviour
         ws.Send(JsonUtility.ToJson(_data));
     }
 
+    public void SendBlock(SendBlock value)
+    {
+        Data Message = new Data();
+        Message.action = "SendBlock";
+        Message.Json = JsonUtility.ToJson(value);
+
+        ws.Send(JsonUtility.ToJson(Message));
+    }
+
+    #endregion
+
+    #region GetMessage
     private void Ws_OnMessage(object sender, MessageEventArgs e)
     {
         print("mensaje recibido");
         Debug.Log(">>> " + e.Data.ToString());
-        misDatos = JsonUtility.FromJson<DataSend>(e.Data.ToString());
-
-        //Debug.Log(TileBlock.BlockIdDictionary[misDatos.BlockID].gameObject.name);
-        //StartCoroutine(GetBlock(TileBlock.BlockIdDictionary[misDatos.BlockID].gameObject));
-
+        misDatos = JsonUtility.FromJson<Data>(e.Data.ToString());
+        //misDatos = JsonUtility.FromJson<SendBlock>(Json);
         print("----fin mensaje recibido");
-        // Poner Bloque
     }
 
+    IEnumerator sincronizar()
+    {
+        //if (Input.GetKeyDown(KeyCode.Space))
+        while (true)
+        {
+            if (misDatos != null)
+            {
+                switch (misDatos.action)
+                {
+                    case "SendBlock":
+                        SendBlock Json = JsonUtility.FromJson<SendBlock>(misDatos.Json.ToString());
+                        ReciveBlock(Json);
+                        break;
+                    default:
+                        break;
+                }
+                misDatos = null;
+            }
+            yield return new WaitForSeconds(Time.fixedDeltaTime);
+        }
+
+    }
+
+    private void ReciveBlock(SendBlock value)
+    {
+        TileBlock.BlockIdDictionary[value.BlockID].CanISend = false;
+        StartCoroutine(GetBlock(TileBlock.BlockIdDictionary[value.BlockID]));
+    }
+    #endregion
+
+    #region Corutines
     IEnumerator GetBlock(BlockLogic value)
     {
         yield return new WaitForSeconds(1f);
@@ -99,21 +131,5 @@ public class WebSocketManager : MonoBehaviour
             Debug.Log("Activada");
         }
     }
-
-    IEnumerator sincronizar()
-    {
-        //if (Input.GetKeyDown(KeyCode.Space))
-        while (true)
-        {
-            if (misDatos != null)
-            {
-                TileBlock.BlockIdDictionary[misDatos.BlockID].CanISend = false;
-
-                StartCoroutine(GetBlock(TileBlock.BlockIdDictionary[misDatos.BlockID]));
-                misDatos = null;
-            }
-            yield return new WaitForSeconds(Time.fixedDeltaTime);
-        }
-
-    }
+    #endregion
 }

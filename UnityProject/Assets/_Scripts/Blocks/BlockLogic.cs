@@ -66,13 +66,13 @@ public class BlockLogic : MonoBehaviour
     {
         Debug.Log("Bloque roto");
         gameObject.SetActive(false);
-        DataSend Message = new DataSend();
-        Message.BlockID = ID;
-        Message.RoomID = 0;
+        SendBlock BlockMessage = new SendBlock();
+        BlockMessage.BlockID = ID;
+        BlockMessage.RoomID = 0;
 
         if (!CanISend)
             return;
 
-        WebSocketManager.Instance.SendBlock(Message);
+        WebSocketManager.Instance.SendBlock(BlockMessage);
     }
 }
