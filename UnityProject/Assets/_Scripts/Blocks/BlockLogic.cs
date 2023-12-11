@@ -68,7 +68,6 @@ public class BlockLogic : MonoBehaviour
         gameObject.SetActive(false);
         SendBlock BlockMessage = new SendBlock();
         BlockMessage.BlockID = ID;
-        BlockMessage.RoomID = 0;
 
         if (!CanISend)
             return;

@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3d1b9378aad5fe498679ad219d20762, type: 3}
   m_Name: BallStats
   m_EditorClassIdentifier: 
-  initialSpeed: 8
+  initialSpeed: 9
   speedIncrease: 0
   maxAngle: 30

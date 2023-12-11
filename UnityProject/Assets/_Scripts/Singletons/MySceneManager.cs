@@ -93,6 +93,9 @@ public class MySceneManager : MonoBehaviour
         SceneDictionary.Add(1, "MainMenu");
         SceneDictionary.Add(2, "SelectPlayer");
         SceneDictionary.Add(3, "GameLocal");
+
+
+        SceneDictionary.Add(20, "PlayerScene");
     }
 
 

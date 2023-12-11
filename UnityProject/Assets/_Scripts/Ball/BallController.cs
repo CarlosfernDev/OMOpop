@@ -12,8 +12,9 @@ public class BallController : MonoBehaviour
     [SerializeField] private BallStats _BallStats;
     [SerializeField] private Rigidbody2D _rb;
     private Vector2 _Velocity;
-    private bool _IHit;
 
+    bool isHittedX = false;
+    bool isHittedY = false;
     bool isLaunched = false;
 
     private void Awake()
@@ -34,7 +35,8 @@ public class BallController : MonoBehaviour
         if (!isLaunched)
             return;
 
-        _IHit = false;
+       isHittedX = false;
+       isHittedY = false;
     }
 
     private void FixedUpdate()
@@ -142,10 +144,6 @@ public class BallController : MonoBehaviour
 
     private void BrickCollision(GameObject P, Vector2 HitPosition)
     {
-        if (_IHit)
-            return;
-
-        _IHit = true;
 
         // Invertir la velocidad en el eje Y
 
@@ -154,20 +152,31 @@ public class BallController : MonoBehaviour
 
         // Script del bloque no poner aqui, Funcion publica de restar vida y que compruebe la vida del bloque y otra donde lo haga desaparecer.
 
-        Debug.Log(Mathf.Abs((HitPosition.y - P.transform.position.y)) > (P.transform.localScale.y/2) - 0.057);
-        Debug.Log(Mathf.Abs((HitPosition.y - P.transform.position.y)));
-        if(Mathf.Abs((HitPosition.y - P.transform.position.y)) > (P.transform.localScale.y / 2) - 0.047)
+        Debug.Log(Mathf.Abs((HitPosition.y - P.transform.position.y)) > (P.transform.localScale.y/2) - 0.047);
+        Debug.Log(Mathf.Abs(HitPosition.x - P.transform.position.x) < Mathf.Abs(HitPosition.y - P.transform.position.y));
+        Debug.Log(Mathf.Abs((HitPosition.x - P.transform.position.x)));
+        Debug.Log(Mathf.Abs((HitPosition.y - P.transform.position.y))); 
+
+
+        if((((Mathf.Abs((HitPosition.y - P.transform.position.y)) > (P.transform.localScale.y / 2) - 0.047)) || ((Mathf.Abs((HitPosition.x - P.transform.position.x)) < (P.transform.localScale.x / 2) - 0.047))) || isHittedX)
         {
-            _rb.velocity = new Vector2(_rb.velocity.x, Mathf.Sign(HitPosition.y - P.transform.position.y) * Mathf.Abs(_rb.velocity.y));
+            if (!isHittedY)
+            {
+                _rb.velocity = new Vector2(_rb.velocity.x, Mathf.Sign(HitPosition.y - P.transform.position.y) * Mathf.Abs(_rb.velocity.y));
+                isHittedY = true;
+            }
         }
         else
         {
-            _rb.velocity = new Vector2(Mathf.Sign(HitPosition.x - P.transform.position.x) * Mathf.Abs(_rb.velocity.x), _rb.velocity.y);
+            if (!isHittedX)
+            {
+                _rb.velocity = new Vector2(Mathf.Sign(HitPosition.x - P.transform.position.x) * Mathf.Abs(_rb.velocity.x), _rb.velocity.y);
+                isHittedX = true;
+            }
         }
 
 
         P.GetComponent<BlockLogic>().RestarVida(1);
-
     }
 
     private void LearnDictionaryTags()
