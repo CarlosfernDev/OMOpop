@@ -25,6 +25,10 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (GameManager.Instance.roomStatus == GameManager.gameState.Waiting)
+            return;
+
+
         MovePrediction();
     }
 

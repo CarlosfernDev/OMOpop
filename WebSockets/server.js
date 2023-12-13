@@ -3,6 +3,7 @@ const WebSocket = require("ws");
 let publicRoom = new Map();
 let ConexionRoom = new Map();
 let TemporizadorRoom = new Map();
+let TemporizadorRoomNumber = new Map();
 let StateRoom = new Map();
 
 var MaxPlayers = 99;
@@ -137,6 +138,7 @@ function JoinPublicRoom(data, conexiontemporal){
 		TempRoom = clave;
 		Json["roomID"] = TempRoom;
 		Connected = true;
+
 		break;
 	}
 
@@ -153,6 +155,17 @@ function JoinPublicRoom(data, conexiontemporal){
 	SendPlayerCounterRoom(TempRoom);
 	console.log("Unido al Lobby eres el " + publicRoom.get(TempRoom).length);
 	console.log(publicRoom.get(TempRoom).length);
+
+	var obj = new Object();
+	obj.action = "TimerStarter";
+	obj.roomID = TempRoom;
+	obj.user = " ";
+
+	var obj2 = new Object();
+	obj2.Value1 = TemporizadorRoomNumber.get(TempRoom);
+	obj.Json = JSON.stringify(obj2);
+
+	conexiontemporal.send(JSON.stringify(obj));
 }
 
 function CreatePublicRoom(){
@@ -202,15 +215,29 @@ function CreateRoom(ID){
 
 function StartTemporizador(ID){
 	let tiempoRestante = Timer;
+	TemporizadorRoomNumber.set(ID, tiempoRestante);
 	const tareaInterval = setInterval(() => {
 
 		if (tiempoRestante <= 0) {
+			TemporizadorRoomNumber.clear(ID);
 			clearInterval(tareaInterval);
 			StateRoom.set(ID, ServerState.Ingame);
+
 			console.log('¡Cuenta regresiva finalizada!');
+
+			var obj = new Object();
+			obj.action = "TimerEnded";
+			obj.roomID = ID;
+			obj.user = " ";
+		
+			publicRoom.get(ID).forEach(c => {
+				c.send(JSON.stringify(obj));
+			});
+
 		} else {
 			console.log(`Tiempo restante: ${tiempoRestante} segundos`);
 			tiempoRestante--;
+			TemporizadorRoomNumber.set(ID, tiempoRestante);
 		}
 	  }, 1000);
 

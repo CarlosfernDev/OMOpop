@@ -35,6 +35,11 @@ public class WebSocketManager : MonoBehaviour
     public Action<string> OnPingChange;
     public Action<string> OnLocalPlayerChange;
     public Action<string> OnPlayerChange;
+
+    public int TimerValue;
+    public Action<int> OnStartTimer;
+    public Action OnEndTimer;
+
     public Action OnServerClose;
     public Action OnServerConnect;
 
@@ -204,7 +209,7 @@ public class WebSocketManager : MonoBehaviour
     private void Ws_OnMessage(object sender, MessageEventArgs e)
     {
         //print("mensaje recibido");
-        //Debug.Log(">>> " + e.Data.ToString());
+        Debug.Log(">>> " + e.Data.ToString());
         try
         {
             //Debug.Log("Recibido exitosamente");
@@ -228,6 +233,8 @@ public class WebSocketManager : MonoBehaviour
         //if (Input.GetKeyDown(KeyCode.Space))
         while (true)
         {
+            float TimeReference;
+
             if (misDatos != null)
             {
                 List<Data> backUpDatos = new List<Data>(misDatos);
@@ -255,6 +262,14 @@ public class WebSocketManager : MonoBehaviour
                             string JsonLocalPlayer = JsonUtility.FromJson<OneData>(midato.Json.ToString()).Value1;
                             SetLocalPlayerData(JsonLocalPlayer);
                             break;
+                        case "TimerStarter":
+                            string JsonLocalTimer = JsonUtility.FromJson<OneData>(midato.Json.ToString()).Value1;
+                            SetPublicTimmer(JsonLocalTimer);
+                            break;
+                        case "TimerEnded":
+                            if (OnEndTimer != null)
+                                OnEndTimer.Invoke();
+                            break;
                         default:
                             break;
                     }
@@ -279,6 +294,16 @@ public class WebSocketManager : MonoBehaviour
             }
             yield return new WaitForSeconds(Time.fixedDeltaTime);
         }
+    }
+
+    private void SetPublicTimmer(string value)
+    {
+        if (OnStartTimer != null)
+        {
+            OnStartTimer.Invoke(int.Parse(value));
+            return;
+        }
+        TimerValue = int.Parse(value);
     }
 
     private void ReciveJoinPublicRoom(string recivedRoomID)

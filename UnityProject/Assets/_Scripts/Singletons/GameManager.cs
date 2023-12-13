@@ -4,15 +4,36 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public static GameManager Instance; 
+
+    public enum gameState {Waiting, Playing, Over};
+    public gameState roomStatus = gameState.Waiting;
+    
+
+    private void Awake()
     {
-        
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(this);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-        
+        WebSocketManager.Instance.OnStartTimer = SetWaiting;
+    }
+
+    public void SetWaiting(int value)
+    {
+        roomStatus = gameState.Waiting;
+    }
+
+    public void SetMatch()
+    {
+        roomStatus = gameState.Playing;
     }
 }
