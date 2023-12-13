@@ -5325,6 +5325,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87a71514a2a87394e9c3c69b4512c1bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isStandBy: 0
   _text: {fileID: 1605516189}
 --- !u!1001 &846856244
 PrefabInstance:
@@ -11383,6 +11384,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: ae5046d8-a26e-4107-98aa-543b5d1dc1af
     m_ActionName: InGame/Launch[/Keyboard/space]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 838454708}
+        m_TargetAssemblyTypeName: StartTimmer, Assembly-CSharp
+        m_MethodName: EnterInput
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 41b03c4b-1aea-46ca-8231-a3175ffe0f62
+    m_ActionName: InGame/Enter[/Keyboard/enter]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: InGame

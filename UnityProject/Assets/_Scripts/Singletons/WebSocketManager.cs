@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 using WebSocketSharp;
 
 public class SendBlock
@@ -36,9 +37,11 @@ public class WebSocketManager : MonoBehaviour
     public Action<string> OnLocalPlayerChange;
     public Action<string> OnPlayerChange;
 
-    public int TimerValue;
+    public int TimerValue = 0;
+    public bool StartMatch = false;
     public Action<int> OnStartTimer;
     public Action OnEndTimer;
+    public Action OnStartMatch;
 
     public Action OnServerClose;
     public Action OnServerConnect;
@@ -88,14 +91,6 @@ public class WebSocketManager : MonoBehaviour
 
         StartWS();
 
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            onSendMessageToAll();
-        }
     }
 
     private void OnDisable()
@@ -153,13 +148,27 @@ public class WebSocketManager : MonoBehaviour
         return true;
     }
 
+    public void SendMesage(string value)
+    {
+        if (!PreMessage())
+            return;
+
+        Data _data = new Data();
+        _data.roomID = roomID;
+        _data.user = username;
+        _data.action = value;
+        ws.Send(JsonUtility.ToJson(_data));
+    }
+
     public void onSendMessageToAll()
     {
         if (!PreMessage())
             return;
 
         Data _data = new Data();
-        _data.action = "sendToAll";
+        _data.roomID = roomID;
+        _data.user = username;
+        _data.action = "onSendMessageToAll";
         ws.Send(JsonUtility.ToJson(_data));
     }
 
@@ -269,6 +278,12 @@ public class WebSocketManager : MonoBehaviour
                         case "TimerEnded":
                             if (OnEndTimer != null)
                                 OnEndTimer.Invoke();
+                            break;
+                        case "StartMatch":
+                            if (OnStartMatch != null)
+                                OnStartMatch.Invoke();
+
+                            StartMatch = true;
                             break;
                         default:
                             break;

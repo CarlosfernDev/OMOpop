@@ -2,27 +2,43 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.InputSystem;
 
 public class StartTimmer : MonoBehaviour
 {
     int TimerValue;
+    public bool isStandBy = false;
     private float TimeReference;
     private int MaxTimerValue;
 
     string firsttext = "The match start in: ";
+    string standbyText = "Waiting for players. Press enter to skip.";
     [SerializeField] private TMP_Text _text;
 
     Coroutine TimerRoutine;
 
     private void Awake()
     {
-        if (WebSocketManager.Instance.TimerValue != null)
+        if (WebSocketManager.Instance.TimerValue != 0)
         {
             StartTimmerFunction(WebSocketManager.Instance.TimerValue);
         }
+        else
+        {
+            if(WebSocketManager.Instance.StartMatch)
+                EndTimmerFunction();
+            else
+            {
+                StandBy();
+                WebSocketManager.Instance.StartMatch = false;
+            }
+
+        }
+
+        WebSocketManager.Instance.TimerValue = 0;
 
         WebSocketManager.Instance.OnStartTimer = StartTimmerFunction;
-        WebSocketManager.Instance.OnEndTimer = EndTimmerFunction;
+        WebSocketManager.Instance.OnStartMatch = EndTimmerFunction;
     }
 
     public void StartTimmerFunction(int value)
@@ -40,8 +56,21 @@ public class StartTimmer : MonoBehaviour
         TimerRoutine = StartCoroutine(Timer(false));
     }
 
+    public void StandBy()
+    {
+        isStandBy = true;
+
+        if (TimerRoutine != null)
+            StopCoroutine(TimerRoutine);
+
+
+        _text.text = standbyText;
+    }
+
     public void EndTimmerFunction()
     {
+        isStandBy = false;
+
         if (TimerRoutine != null)
             StopCoroutine(TimerRoutine);
 
@@ -56,6 +85,19 @@ public class StartTimmer : MonoBehaviour
     private void UpdateText()
     {
         _text.text = firsttext + TimerValue.ToString();
+    }
+
+    public void EnterInput(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.performed)
+        {
+            return;
+        }
+
+        if (!isStandBy)
+            return;
+
+        WebSocketManager.Instance.SendMesage("StartMatch");
     }
 
     IEnumerator Timer(bool value)
@@ -73,6 +115,10 @@ public class StartTimmer : MonoBehaviour
         {
             GameManager.Instance.roomStatus = GameManager.gameState.Playing;
             _text.gameObject.SetActive(false);
+        }
+        else
+        {
+            StandBy();
         }
     }
 }

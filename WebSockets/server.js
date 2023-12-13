@@ -103,6 +103,9 @@ switch(Json["action"]){
 	case 'GetPlayerNumber':
 		SendUsersConnected(conexiontemporal);
 	break;
+	case 'StartMatch':
+
+	break;
 	case '':
 	break;
 	default:
@@ -156,16 +159,20 @@ function JoinPublicRoom(data, conexiontemporal){
 	console.log("Unido al Lobby eres el " + publicRoom.get(TempRoom).length);
 	console.log(publicRoom.get(TempRoom).length);
 
-	var obj = new Object();
-	obj.action = "TimerStarter";
-	obj.roomID = TempRoom;
-	obj.user = " ";
-
-	var obj2 = new Object();
-	obj2.Value1 = TemporizadorRoomNumber.get(TempRoom);
-	obj.Json = JSON.stringify(obj2);
-
-	conexiontemporal.send(JSON.stringify(obj));
+	if(publicRoom.get(TempRoom).length >= MaxPlayers){
+	StartMatch(TempRoom);
+	}else{
+		var obj = new Object();
+		obj.action = "TimerStarter";
+		obj.roomID = TempRoom;
+		obj.user = " ";
+	
+		var obj2 = new Object();
+		obj2.Value1 = TemporizadorRoomNumber.get(TempRoom);
+		obj.Json = JSON.stringify(obj2);
+	
+		conexiontemporal.send(JSON.stringify(obj));
+	}
 }
 
 function CreatePublicRoom(){
@@ -242,6 +249,21 @@ function StartTemporizador(ID){
 	  }, 1000);
 
 	TemporizadorRoom.set(ID, tareaInterval);
+}
+
+function StartMatch(ID){
+	var obj = new Object();
+	obj.action = "StartMatch";
+	obj.roomID = TempRoom;
+	obj.user = " ";
+
+	var obj2 = new Object();
+	obj2.Value1 = TemporizadorRoomNumber.get(TempRoom);
+	obj.Json = JSON.stringify(obj2);
+
+	publicRoom.get(ID).forEach(c => {
+		c.send(JSON.stringify(obj));
+	});
 }
 
 function SendPlayerCounterRoom(ID){

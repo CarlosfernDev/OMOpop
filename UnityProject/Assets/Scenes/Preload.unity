@@ -334,7 +334,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90e580d3d5b6b144bb9c500a543667d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  username: 
   roomID: 
+  playersConnectedInRoom: 
+  playersConnected: 
+  TimerValue: 0
+  ping: 
+  IsConnected: 0
+  misDatos: []
 --- !u!4 &1092410817
 Transform:
   m_ObjectHideFlags: 0

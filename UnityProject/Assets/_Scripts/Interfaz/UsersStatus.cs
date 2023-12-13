@@ -20,8 +20,6 @@ public class UsersStatus : MonoBehaviour
 
     public void UpdateText(string value)
     {
-        Debug.Log("Se conecto alguien " + value);
-
         if (!string.IsNullOrEmpty(value))
             _Text.text = "Players: " + value;
         else
