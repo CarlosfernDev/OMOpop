@@ -6,7 +6,7 @@ let TemporizadorRoom = new Map();
 let TemporizadorRoomNumber = new Map();
 let StateRoom = new Map();
 
-var MaxPlayers = 99;
+var MaxPlayers = 2;
 var Timer = 60;
 
 const ServerState = {
@@ -104,7 +104,7 @@ switch(Json["action"]){
 		SendUsersConnected(conexiontemporal);
 	break;
 	case 'StartMatch':
-
+		StartMatch(Json["roomID"]);
 	break;
 	case '':
 	break;
@@ -228,7 +228,7 @@ function StartTemporizador(ID){
 		if (tiempoRestante <= 0) {
 			TemporizadorRoomNumber.clear(ID);
 			clearInterval(tareaInterval);
-			StateRoom.set(ID, ServerState.Ingame);
+			StateRoom.set(ID, ServerState.FindingPlayers);
 
 			console.log('¡Cuenta regresiva finalizada!');
 
@@ -254,16 +254,16 @@ function StartTemporizador(ID){
 function StartMatch(ID){
 	var obj = new Object();
 	obj.action = "StartMatch";
-	obj.roomID = TempRoom;
+	obj.roomID = ID;
 	obj.user = " ";
 
-	var obj2 = new Object();
-	obj2.Value1 = TemporizadorRoomNumber.get(TempRoom);
-	obj.Json = JSON.stringify(obj2);
+	DetenerTemporizador(ID);
 
 	publicRoom.get(ID).forEach(c => {
 		c.send(JSON.stringify(obj));
 	});
+	
+	StateRoom.set(ID, ServerState.Ingame);
 }
 
 function SendPlayerCounterRoom(ID){

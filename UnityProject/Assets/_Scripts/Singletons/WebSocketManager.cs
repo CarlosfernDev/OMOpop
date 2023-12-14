@@ -8,6 +8,7 @@ using WebSocketSharp;
 public class SendBlock
 {
     public int BlockID;
+    public int BlockRemain;
 }
 
 public class OneData
@@ -58,6 +59,7 @@ public class WebSocketManager : MonoBehaviour
     #region UnityFunctions
     private void Awake()
     {
+        TimerValue = 0;
         if (Instance == null)
         {
             Instance = this;
@@ -280,10 +282,9 @@ public class WebSocketManager : MonoBehaviour
                                 OnEndTimer.Invoke();
                             break;
                         case "StartMatch":
+                            StartMatch = true;
                             if (OnStartMatch != null)
                                 OnStartMatch.Invoke();
-
-                            StartMatch = true;
                             break;
                         default:
                             break;
@@ -316,7 +317,6 @@ public class WebSocketManager : MonoBehaviour
         if (OnStartTimer != null)
         {
             OnStartTimer.Invoke(int.Parse(value));
-            return;
         }
         TimerValue = int.Parse(value);
     }

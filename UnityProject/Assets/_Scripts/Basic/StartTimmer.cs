@@ -35,9 +35,8 @@ public class StartTimmer : MonoBehaviour
 
         }
 
-        WebSocketManager.Instance.TimerValue = 0;
-
         WebSocketManager.Instance.OnStartTimer = StartTimmerFunction;
+        WebSocketManager.Instance.OnEndTimer = StandBy;
         WebSocketManager.Instance.OnStartMatch = EndTimmerFunction;
     }
 

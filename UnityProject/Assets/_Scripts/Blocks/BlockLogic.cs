@@ -18,6 +18,7 @@ public class BlockLogic : MonoBehaviour
 
     private void Start()
     {
+        TileBlock.BlocksNumber += 1;
         TileBlock.AddID(ID,this);
         vidaActual = vidaMaxima;
         _Text.text = vidaActual.ToString();
@@ -25,8 +26,10 @@ public class BlockLogic : MonoBehaviour
 
     private void OnEnable()
     {
+        TileBlock.BlocksNumber += 1;
         vidaActual = vidaMaxima;
         _Text.text = vidaActual.ToString();
+        Debug.Log(TileBlock.BlocksNumber);
     }
 
     /*private void OnCollisionEnter(Collision collision)
@@ -43,6 +46,8 @@ public class BlockLogic : MonoBehaviour
         vidaActual = Mathf.Clamp(vidaActual + value, 0, 999);
         _Text.text = vidaActual.ToString();
         comprobarVida();
+        TileBlock.BlocksNumber += 1;
+        Debug.Log(TileBlock.BlocksNumber);
     }
 
     public void RestarVida(int value)
@@ -51,6 +56,8 @@ public class BlockLogic : MonoBehaviour
         vidaActual = Mathf.Clamp(vidaActual - value,0,999);
         _Text.text = vidaActual.ToString();
         comprobarVida();
+        TileBlock.BlocksNumber -= 1;
+        Debug.Log(TileBlock.BlocksNumber);
     }
 
     public void comprobarVida()

@@ -5,9 +5,11 @@ using UnityEngine;
 public class TileBlock : MonoBehaviour
 {
     static public Dictionary<int, BlockLogic> BlockIdDictionary;
+    static public int BlocksNumber;
 
     private void Awake()
     {
+        BlocksNumber = 0;
         startDictionary(); 
     }
 
