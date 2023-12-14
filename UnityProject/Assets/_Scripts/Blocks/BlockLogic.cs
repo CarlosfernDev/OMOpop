@@ -18,7 +18,6 @@ public class BlockLogic : MonoBehaviour
 
     private void Start()
     {
-        TileBlock.BlocksNumber += 1;
         TileBlock.AddID(ID,this);
         vidaActual = vidaMaxima;
         _Text.text = vidaActual.ToString();
@@ -65,6 +64,7 @@ public class BlockLogic : MonoBehaviour
         // Verificar si la vida llegó a cero para romper el bloque
         if (vidaActual <= 0)
         {
+            WebSocketManager.Instance.SendBlockRemain(TileBlock.BlocksNumber);
             RomperBloque();
         }
     }

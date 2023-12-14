@@ -5,8 +5,9 @@ let ConexionRoom = new Map();
 let TemporizadorRoom = new Map();
 let TemporizadorRoomNumber = new Map();
 let StateRoom = new Map();
+let ScoreRoom = new Map();
 
-var MaxPlayers = 2;
+var MaxPlayers = 1;
 var Timer = 60;
 
 const ServerState = {
@@ -106,6 +107,10 @@ switch(Json["action"]){
 	case 'StartMatch':
 		StartMatch(Json["roomID"]);
 	break;
+	case 'BlocksRemain':
+		var JsonScore = JSON.parse(data.toString());
+		agregarPuntuacion(conexiontemporal, JsonScore[Value1], Json[roomID].toString());
+	break;
 	case '':
 	break;
 	default:
@@ -185,6 +190,10 @@ for(var i = 1; i < 99;i++){
 	CreateRoom("pub"+serie);
 	StateRoom.set("pub"+serie, ServerState.FindingPlayers);
 	StartTemporizador("pub"+serie);
+
+	var scores = [];
+	ScoreRoom.set("pub"+serie, scores);
+
 	return ("pub"+serie);
 }
 return null;
@@ -207,6 +216,7 @@ function LeavePublicRoom(conexiontemporal){
 	if (conexionesTemporales.length == 0) {
 		publicRoom.delete(roomID);
 		StateRoom.delete(roomID);
+		ScoreRoom.delete(roomID);
 		DetenerTemporizador(roomID);
 	} else {
 		publicRoom.set(roomID, conexionesTemporales);
@@ -298,11 +308,55 @@ function SendBlock(data){
 	return;
 
 	console.log("Se mando un bloque");
+
+
 	var i = clamp(Math.floor(Math.random() * conexiones.length),0,1000)
-	publicRoom.get(Json["roomID"].toString()).forEach(c => {if(c == conexiones[i])conexiones[i].send(data.toString())});
+	publicRoom.get(Json["roomID"].toString()).forEach(c => {if(c == conexiones[i]){
+		conexiones[i].send(data.toString())
+		restarPuntosAjugador(conexiones[i],1,Json["roomID"].toString());
+	}});
 
 	data.toString
 }
+
+function agregarPuntuacion(playerName, score, ID) {
+	var list = ScoreRoom.get(ID);
+	list.push({ playerName, score });
+	console.log(list);
+	ScoreRoom.set(ID, list);
+}
+
+function obtenerPuntajeDeJugador(playerName, ID) {
+	scores = ScoreRoom.get(ID);
+	scores.sort((a, b) => b.score - a.score);
+	const jugador = scores.find((puntuacion) => puntuacion.playerName === playerName);
+	return jugador ? jugador.score : null;
+}
+
+function restarPuntosAjugador(playerName, puntosARestar, ID) {
+	scores = ScoreRoom.get(ID);
+	console.log(ID);
+	console.log(playerName);
+	console.log(scores.length);
+	console.log("_________________________________________________________________");
+	var jugador = scores.find(puntuacion => {
+		console.log(">>> ",puntuacion);
+		return puntuacion.playerName == playerName;
+	});
+	console.log("_________________________________________________________________");
+  
+
+	if (jugador != null) {
+	  jugador.score -= puntosARestar;
+  
+	  if (jugador.score < 0) {
+		jugador.score = 0;
+	  }
+	  console.log("Le reste puntos");
+	} else {
+	  console.log(`El jugador ${playerName} no fue encontrado.`);
+	}
+  }
 
 function SendPing(data, conexiontemporal){
 	const PingDate = new Date(data.toString());

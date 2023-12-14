@@ -214,6 +214,23 @@ public class WebSocketManager : MonoBehaviour
         ws.Send(JsonUtility.ToJson(_data));
     }
 
+    public void SendBlockRemain(int value)
+    {
+        if (!PreMessage())
+            return;
+
+        Data _data = new Data();
+        _data.action = "BlocksRemain";
+        _data.roomID = roomID;
+
+        OneData Class = new OneData();
+        Class.Value1 = value.ToString();
+
+        _data.Json = JsonUtility.ToJson(Class);
+
+        ws.Send(JsonUtility.ToJson(_data));
+    }
+
     #endregion
 
     #region GetMessage
@@ -249,6 +266,7 @@ public class WebSocketManager : MonoBehaviour
             if (misDatos != null)
             {
                 List<Data> backUpDatos = new List<Data>(misDatos);
+                misDatos.Clear();
 
                 foreach (Data midato in backUpDatos)
                 {
@@ -289,7 +307,6 @@ public class WebSocketManager : MonoBehaviour
                         default:
                             break;
                     }
-                    misDatos.Remove(midato);
                 }
             }
             if (!ws.Ping(DateTime.UtcNow.ToString("O")))

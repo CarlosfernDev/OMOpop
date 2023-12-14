@@ -13,6 +13,11 @@ public class TileBlock : MonoBehaviour
         startDictionary(); 
     }
 
+    private void Start()
+    {
+        // To do mandar los bloques que me falta a la lista
+    }
+
     void startDictionary()
     {
         BlockIdDictionary = new Dictionary<int, BlockLogic>();
