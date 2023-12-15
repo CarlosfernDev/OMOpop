@@ -152,11 +152,6 @@ public class BallController : MonoBehaviour
 
         // Script del bloque no poner aqui, Funcion publica de restar vida y que compruebe la vida del bloque y otra donde lo haga desaparecer.
 
-        Debug.Log(Mathf.Abs((HitPosition.y - P.transform.position.y)) > (P.transform.localScale.y/2) - 0.047);
-        Debug.Log(Mathf.Abs(HitPosition.x - P.transform.position.x) < Mathf.Abs(HitPosition.y - P.transform.position.y));
-        Debug.Log(Mathf.Abs((HitPosition.x - P.transform.position.x)));
-        Debug.Log(Mathf.Abs((HitPosition.y - P.transform.position.y))); 
-
 
         if((((Mathf.Abs((HitPosition.y - P.transform.position.y)) > (P.transform.localScale.y / 2) - 0.047)) || ((Mathf.Abs((HitPosition.x - P.transform.position.x)) < (P.transform.localScale.x / 2) - 0.047))) || isHittedX)
         {

@@ -108,8 +108,8 @@ switch(Json["action"]){
 		StartMatch(Json["roomID"]);
 	break;
 	case 'BlocksRemain':
-		var JsonScore = JSON.parse(data.toString());
-		agregarPuntuacion(conexiontemporal, JsonScore[Value1], Json[roomID].toString());
+		var JsonScore = JSON.parse(Json["Json"]);
+		agregarPuntuacion(conexiontemporal, JsonScore["Value1"], Json["roomID"].toString());
 	break;
 	case '':
 	break;
@@ -313,17 +313,31 @@ function SendBlock(data){
 	var i = clamp(Math.floor(Math.random() * conexiones.length),0,1000)
 	publicRoom.get(Json["roomID"].toString()).forEach(c => {if(c == conexiones[i]){
 		conexiones[i].send(data.toString())
-		restarPuntosAjugador(conexiones[i],1,Json["roomID"].toString());
 	}});
+	AddPuntosAjugador(conexiones[i],1,Json["roomID"].toString());
 
 	data.toString
 }
 
 function agregarPuntuacion(playerName, score, ID) {
-	var list = ScoreRoom.get(ID);
-	list.push({ playerName, score });
-	console.log(list);
-	ScoreRoom.set(ID, list);
+	var scores = ScoreRoom.get(ID);
+
+	var jugador = scores.find(puntuacion => {
+		return puntuacion.playerName == playerName;
+	});
+
+
+	if (jugador != null) {
+		scores = scores.filter(
+			(c)=>{
+				return c!=jugador
+			}
+		);
+	}
+
+	scores.push({ playerName, score });
+	console.log(scores.length);
+	ScoreRoom.set(ID, scores);
 }
 
 function obtenerPuntajeDeJugador(playerName, ID) {
@@ -335,28 +349,42 @@ function obtenerPuntajeDeJugador(playerName, ID) {
 
 function restarPuntosAjugador(playerName, puntosARestar, ID) {
 	scores = ScoreRoom.get(ID);
-	console.log(ID);
-	console.log(playerName);
-	console.log(scores.length);
-	console.log("_________________________________________________________________");
 	var jugador = scores.find(puntuacion => {
-		console.log(">>> ",puntuacion);
 		return puntuacion.playerName == playerName;
 	});
-	console.log("_________________________________________________________________");
-  
+
 
 	if (jugador != null) {
-	  jugador.score -= puntosARestar;
-  
-	  if (jugador.score < 0) {
-		jugador.score = 0;
-	  }
-	  console.log("Le reste puntos");
+		jugador.score -= puntosARestar;
+
+		if (jugador.score < 0) {
+			jugador.score = 0;
+		}
+		console.log("Le reste puntos");
 	} else {
-	  console.log(`El jugador ${playerName} no fue encontrado.`);
+		console.log(`El jugador ${playerName} no fue encontrado.`);
 	}
-  }
+}
+
+function AddPuntosAjugador(playerName, puntosARestar, ID) {
+	scores = ScoreRoom.get(ID);
+	var jugador = scores.find(puntuacion => {
+		return puntuacion.playerName == playerName;
+	});
+
+
+	if (jugador != null) {
+		IntScore = parseInt(jugador.score);
+		jugador.score = IntScore + puntosARestar;
+
+		if (jugador.score < 0) {
+			jugador.score = 132;
+		}
+		console.log("Le reste puntos");
+	} else {
+		console.log(`El jugador ${playerName} no fue encontrado.`);
+	}
+}
 
 function SendPing(data, conexiontemporal){
 	const PingDate = new Date(data.toString());

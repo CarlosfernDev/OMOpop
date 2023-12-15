@@ -226,7 +226,7 @@ public class WebSocketManager : MonoBehaviour
         OneData Class = new OneData();
         Class.Value1 = value.ToString();
 
-        _data.Json = JsonUtility.ToJson(Class);
+        _data.Json = JsonUtility.ToJson(Class).ToString();
 
         ws.Send(JsonUtility.ToJson(_data));
     }
@@ -292,6 +292,7 @@ public class WebSocketManager : MonoBehaviour
                             SetLocalPlayerData(JsonLocalPlayer);
                             break;
                         case "TimerStarter":
+                            TileBlock.BlocksNumber = 0;
                             string JsonLocalTimer = JsonUtility.FromJson<OneData>(midato.Json.ToString()).Value1;
                             SetPublicTimmer(JsonLocalTimer);
                             break;

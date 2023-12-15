@@ -31,6 +31,11 @@ public class BlockLogic : MonoBehaviour
         Debug.Log(TileBlock.BlocksNumber);
     }
 
+    private void OnDisable()
+    {
+        TileBlock.BlocksNumber -= 1;
+    }
+
     /*private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Pelota"))
@@ -56,6 +61,7 @@ public class BlockLogic : MonoBehaviour
         _Text.text = vidaActual.ToString();
         comprobarVida();
         TileBlock.BlocksNumber -= 1;
+        WebSocketManager.Instance.SendBlockRemain(TileBlock.BlocksNumber);
         Debug.Log(TileBlock.BlocksNumber);
     }
 
@@ -64,7 +70,7 @@ public class BlockLogic : MonoBehaviour
         // Verificar si la vida llegó a cero para romper el bloque
         if (vidaActual <= 0)
         {
-            WebSocketManager.Instance.SendBlockRemain(TileBlock.BlocksNumber);
+            TileBlock.BlocksNumber += 1;
             RomperBloque();
         }
     }

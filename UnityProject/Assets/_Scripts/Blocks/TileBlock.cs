@@ -9,13 +9,12 @@ public class TileBlock : MonoBehaviour
 
     private void Awake()
     {
-        BlocksNumber = 0;
         startDictionary(); 
     }
 
     private void Start()
     {
-        // To do mandar los bloques que me falta a la lista
+        WebSocketManager.Instance.SendBlockRemain(BlocksNumber);
     }
 
     void startDictionary()
