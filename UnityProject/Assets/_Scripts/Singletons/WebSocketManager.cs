@@ -43,10 +43,13 @@ public class WebSocketManager : MonoBehaviour
     public Action<int> OnStartTimer;
     public Action OnEndTimer;
     public Action OnStartMatch;
+    public Action<string> OnEndMatch;
 
     public Action OnServerClose;
     public Action OnServerConnect;
 
+    public Action<string> OnTopChange;
+    public string Top;
 
     WebSocketSharp.WebSocket ws;
     public string ping;
@@ -214,6 +217,18 @@ public class WebSocketManager : MonoBehaviour
         ws.Send(JsonUtility.ToJson(_data));
     }
 
+    public void ILost()
+    {
+        if (!PreMessage())
+            return;
+
+        Data _data = new Data();
+        _data.action = "ILost";
+        _data.roomID = roomID;
+
+        ws.Send(JsonUtility.ToJson(_data));
+    }
+
     public void SendBlockRemain(int value)
     {
         if (!PreMessage())
@@ -305,6 +320,19 @@ public class WebSocketManager : MonoBehaviour
                             if (OnStartMatch != null)
                                 OnStartMatch.Invoke();
                             break;
+                        case "SetTop":
+                            Top = JsonUtility.FromJson<OneData>(midato.Json.ToString()).Value1;
+                            if (OnTopChange != null)
+                                OnTopChange.Invoke(Top);
+                            break;
+                        case "FinishMatch":
+                            Top = JsonUtility.FromJson<OneData>(midato.Json.ToString()).Value1;
+                            if (OnTopChange != null)
+                                OnTopChange.Invoke(Top);
+
+                            if (OnEndMatch != null)
+                                OnEndMatch.Invoke(Top);
+                            break;
                         default:
                             break;
                     }
@@ -323,10 +351,33 @@ public class WebSocketManager : MonoBehaviour
 
                 if (OnServerClose != null)
                     OnServerClose();
-
+                Disconnect();
                 break;
             }
             yield return new WaitForSeconds(Time.fixedDeltaTime);
+        }
+    }
+
+    private void Disconnect()
+    {
+        roomID = null;
+        playersConnectedInRoom = null;
+        playersConnected = null;
+        StartMatch = false;
+        Top = null;
+        ping = null;
+        IsConnected = false;
+        if(GameManager.Instance != null)
+        {
+            GameManager.Instance = null;
+            MySceneManager.Instance.NextScene(1);
+        }
+        else
+        {
+            if (OnPlayerChange != null)
+            {
+                OnPlayerChange(null);
+            }
         }
     }
 
@@ -343,6 +394,16 @@ public class WebSocketManager : MonoBehaviour
     {
         roomID = recivedRoomID;
         MySceneManager.Instance.NextScene(20);
+    }
+
+    public void LeaveGame()
+    {
+        roomID = null;
+        playersConnectedInRoom = null;
+        TimerValue = 0;
+        StartMatch = false;
+        Top = null;
+        SendMesage("LeavePublicRoom");
     }
 
     private void ReciveBlock(SendBlock value)
@@ -375,15 +436,20 @@ public class WebSocketManager : MonoBehaviour
     IEnumerator GetBlock(BlockLogic value)
     {
         yield return new WaitForSeconds(1f);
+        if (TileBlock.BlocksNumber > 0)
+        {
 
-        if (value.gameObject.activeSelf)
-        {
-            value.AddVida(1);
-        }
-        else
-        {
-            value.gameObject.SetActive(true);
-            Debug.Log("Activada");
+            if (value.gameObject.activeSelf)
+            {
+                value.AddVida(1);
+            }
+            else
+            {
+                value.gameObject.SetActive(true);
+                Debug.Log("Activada");
+            }
+            WebSocketManager.Instance.SendBlockRemain(TileBlock.BlocksNumber);
+
         }
     }
     #endregion

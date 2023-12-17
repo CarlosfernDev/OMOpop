@@ -12,7 +12,8 @@ public class StartTimmer : MonoBehaviour
     private int MaxTimerValue;
 
     string firsttext = "The match start in: ";
-    string standbyText = "Waiting for players. Press enter to skip.";
+    string standbyText = "Waiting for players.";
+    string standbyTextWithMore = "Waiting for players. Press enter to skip.";
     [SerializeField] private TMP_Text _text;
 
     Coroutine TimerRoutine;
@@ -35,9 +36,16 @@ public class StartTimmer : MonoBehaviour
 
         }
 
-        WebSocketManager.Instance.OnStartTimer = StartTimmerFunction;
-        WebSocketManager.Instance.OnEndTimer = StandBy;
-        WebSocketManager.Instance.OnStartMatch = EndTimmerFunction;
+        WebSocketManager.Instance.OnStartTimer += StartTimmerFunction;
+        WebSocketManager.Instance.OnEndTimer += StandBy;
+        WebSocketManager.Instance.OnStartMatch += EndTimmerFunction;
+    }
+
+    private void OnDisable()
+    {
+        WebSocketManager.Instance.OnStartTimer -= StartTimmerFunction;
+        WebSocketManager.Instance.OnEndTimer -= StandBy;
+        WebSocketManager.Instance.OnStartMatch -= EndTimmerFunction;
     }
 
     public void StartTimmerFunction(int value)
@@ -62,8 +70,14 @@ public class StartTimmer : MonoBehaviour
         if (TimerRoutine != null)
             StopCoroutine(TimerRoutine);
 
-
-        _text.text = standbyText;
+        if (int.Parse(WebSocketManager.Instance.playersConnectedInRoom) <= 1)
+        {
+            _text.text = standbyText;
+        }
+        else
+        {
+            _text.text = standbyTextWithMore;
+        }
     }
 
     public void EndTimmerFunction()
@@ -88,6 +102,10 @@ public class StartTimmer : MonoBehaviour
 
     public void EnterInput(InputAction.CallbackContext ctx)
     {
+        if (int.Parse(WebSocketManager.Instance.playersConnectedInRoom) <= 1)
+        {
+            return;
+        }
         if (!ctx.performed)
         {
             return;

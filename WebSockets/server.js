@@ -6,9 +6,11 @@ let TemporizadorRoom = new Map();
 let TemporizadorRoomNumber = new Map();
 let StateRoom = new Map();
 let ScoreRoom = new Map();
+let FinishListRoom = new Map();
+let LoserListRoom = new Map();
 
-var MaxPlayers = 1;
-var Timer = 60;
+var MaxPlayers = 99;
+var Timer = 2;
 
 const ServerState = {
 	Offline: 0,
@@ -109,7 +111,10 @@ switch(Json["action"]){
 	break;
 	case 'BlocksRemain':
 		var JsonScore = JSON.parse(Json["Json"]);
-		agregarPuntuacion(conexiontemporal, JsonScore["Value1"], Json["roomID"].toString());
+		agregarPuntuacion(conexiontemporal, JsonScore["Value1"].toString(), Json["roomID"].toString());
+	break;
+	case 'ILost':
+		agregarPerdido(conexiontemporal, 0, Json["roomID"].toString());
 	break;
 	case '':
 	break;
@@ -131,7 +136,7 @@ function JoinPublicRoom(data, conexiontemporal){
 
 	for (const [clave, valor] of publicRoom){
 
-		if (publicRoom.get("pub" + serie).length >= MaxPlayers) {
+		if (publicRoom.get(clave).length >= MaxPlayers) {
 			continue;
 		}
 
@@ -193,6 +198,10 @@ for(var i = 1; i < 99;i++){
 
 	var scores = [];
 	ScoreRoom.set("pub"+serie, scores);
+	var Players = [];
+	FinishListRoom.set("pub"+serie, Players);
+	var Loosers = [];
+	LoserListRoom.set("pub"+serie, Loosers);
 
 	return ("pub"+serie);
 }
@@ -217,10 +226,20 @@ function LeavePublicRoom(conexiontemporal){
 		publicRoom.delete(roomID);
 		StateRoom.delete(roomID);
 		ScoreRoom.delete(roomID);
+		ScoreRoom.delete(roomID);
+		FinishListRoom.delete(roomID);
+		LoserListRoom.delete(roomID);
 		DetenerTemporizador(roomID);
 	} else {
 		publicRoom.set(roomID, conexionesTemporales);
 		SendPlayerCounterRoom(roomID);
+		obtenerPuntajeParaCadaJugador(roomID);
+		scores = ScoreRoom.get(roomID);
+
+		scores = scores.filter(puntuacion => puntuacion.playerName !== conexiontemporal);
+
+		ScoreRoom.set(roomID, scores);
+		obtenerPuntajeParaCadaJugador(roomID);
 	}
 
 	ConexionRoom.delete(conexiontemporal);
@@ -262,6 +281,9 @@ function StartTemporizador(ID){
 }
 
 function StartMatch(ID){
+	if(publicRoom.get(ID).length <= 1)
+	return;
+
 	var obj = new Object();
 	obj.action = "StartMatch";
 	obj.roomID = ID;
@@ -283,7 +305,7 @@ function SendPlayerCounterRoom(ID){
 	obj.user = " ";
 
 	var obj2 = new Object();
-	obj2.Value1 = publicRoom.get(ID).length;
+	obj2.Value1 = publicRoom.get(ID).length + + FinishListRoom.get(ID).length;
 	obj.Json = JSON.stringify(obj2);
 
 	publicRoom.get(ID).forEach(c => {
@@ -309,17 +331,81 @@ function SendBlock(data){
 
 	console.log("Se mando un bloque");
 
+	scores = ScoreRoom.get(Json["roomID"].toString());
 
-	var i = clamp(Math.floor(Math.random() * conexiones.length),0,1000)
-	publicRoom.get(Json["roomID"].toString()).forEach(c => {if(c == conexiones[i]){
-		conexiones[i].send(data.toString())
-	}});
-	AddPuntosAjugador(conexiones[i],1,Json["roomID"].toString());
+	if (scores.length > 1) {
+		var i = clamp(Math.floor(Math.random() * scores.length),0,scores.length)
+		scores[i].playerName.send(data.toString())
+		AddPuntosAjugador(scores[i].playerName,1,Json["roomID"].toString());
+		obtenerPuntajeParaCadaJugador(Json["roomID"].toString());
+	}
 
 	data.toString
 }
 
+function FinishMatch(ID,conexiontemporal){
+
+	var obj = new Object();
+	obj.action = "FinishMatch";
+	obj.roomID = ID;
+	obj.user = " ";
+
+	var obj2 = new Object();
+	var index = 1;
+	obj2.Value1 = null;
+	
+	FinishListRoom.get(ID).forEach(c => {
+		if(c != conexiontemporal){
+			index++;
+			return;
+		}
+		console.log("Lo encontre")
+		obj2.Value1 = index;
+	})
+	if(obj2.Value1 === null){
+		console.log("Es nulo")
+		obj2.Value1 = 1 + ScoreRoom.get(ID).length + FinishListRoom.get(ID).length;
+	}
+
+	obj.Json = JSON.stringify(obj2);
+
+	conexiontemporal.send(JSON.stringify(obj));
+}
+
+function agregarPerdido(playerName, score, ID){
+	var scores = ScoreRoom.get(ID);
+
+	var jugador = scores.find(puntuacion => {
+		return puntuacion.playerName == playerName;
+	});
+
+	if (jugador != null) {
+		scores = scores.filter(
+			(c)=>{
+				return c!=jugador
+			}
+		);
+		console.log(scores.length)
+	}
+	scores.sort((a, b) => a.score - b.score);
+	ScoreRoom.set(ID, scores);
+	LoserListRoom.get(ID).push(playerName);
+	FinishMatch(ID, playerName);
+
+	if(ScoreRoom.get(ID).length <= 1){
+		ScoreRoom.get(ID).forEach(c => {
+			FinishListRoom.get(ID).push(c.playerName);
+			FinishMatch(ID, c.playerName);
+		})
+	}
+	else{
+		obtenerPuntajeParaCadaJugador(ID);
+	}
+
+}
+
 function agregarPuntuacion(playerName, score, ID) {
+
 	var scores = ScoreRoom.get(ID);
 
 	var jugador = scores.find(puntuacion => {
@@ -335,17 +421,77 @@ function agregarPuntuacion(playerName, score, ID) {
 		);
 	}
 
-	scores.push({ playerName, score });
-	console.log(scores.length);
-	ScoreRoom.set(ID, scores);
+	if(score <= 0){
+		ScoreRoom.set(ID, scores);
+		FinishListRoom.get(ID).push(playerName);
+		FinishMatch(ID, playerName);
+
+		if(ScoreRoom.get(ID).length <= 1){
+			ScoreRoom.get(ID).forEach(c => {
+				FinishListRoom.get(ID).push(c.playerName);
+				FinishMatch(ID, c.playerName);
+			})
+		}
+		else{
+			obtenerPuntajeParaCadaJugador(ID);
+		}
+	}else{
+		scores.push({ playerName, score });
+		console.log(scores.length);
+		ScoreRoom.set(ID, scores);
+		obtenerPuntajeParaCadaJugador(ID);
+	}
 }
 
 function obtenerPuntajeDeJugador(playerName, ID) {
 	scores = ScoreRoom.get(ID);
 	scores.sort((a, b) => b.score - a.score);
 	const jugador = scores.find((puntuacion) => puntuacion.playerName === playerName);
-	return jugador ? jugador.score : null;
+	if(jugador != null){
+
+		var obj = new Object();
+		obj.action = "SetTop";
+		obj.roomID = ID;
+		obj.user = " ";
+	
+		var obj2 = new Object();
+		obj2.Value1 = jugador.score;
+		obj.Json = JSON.stringify(obj2);
+
+		jugador.playerName.send(JSON.stringify(obj.toString()))
+	}
 }
+
+function obtenerPuntajeParaCadaJugador(ID) {
+
+	scores = ScoreRoom.get(ID);
+
+	if(scores.length <= 0 || scores == null)
+	return;
+
+	scores.sort((a, b) => a.score - b.score);
+
+	var index = FinishListRoom.get(ID).length + 1;
+
+	scores.forEach((puntuacion) => {
+		console.log("Estoy recorriendo la lista " + index);
+
+		var obj = new Object();
+		obj.action = "SetTop";
+		obj.roomID = ID;
+		obj.user = " ";
+	
+		var obj2 = new Object();
+		obj2.Value1 = index;
+		obj.Json = JSON.stringify(obj2);
+
+		puntuacion.playerName.send(JSON.stringify(obj));
+		index++;
+	});
+
+	return null;
+}
+
 
 function restarPuntosAjugador(playerName, puntosARestar, ID) {
 	scores = ScoreRoom.get(ID);

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class BallController : MonoBehaviour
 {
@@ -16,6 +17,10 @@ public class BallController : MonoBehaviour
     bool isHittedX = false;
     bool isHittedY = false;
     bool isLaunched = false;
+
+    int Up = 3;
+
+    [SerializeField] private TMP_Text _BallText;
 
     private void Awake()
     {
@@ -41,7 +46,7 @@ public class BallController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!isLaunched)
+        if (!isLaunched || GameManager.Instance.roomStatus == GameManager.gameState.Over)
             return;
 
         _rb.velocity = new Vector2(Mathf.Sign(_rb.velocity.x) * Mathf.Clamp(Mathf.Abs(_rb.velocity.x),0.5f, _BallStats.initialSpeed - 0.5f), 
@@ -118,6 +123,18 @@ public class BallController : MonoBehaviour
         transform.position = _SpawnPoint.position;
     }
 
+    private void RemoveHealth(int value)
+    {
+        Up = Up - value;
+        if(Up <= 0)
+        {
+            Up = 0;
+            GameManager.Instance.roomStatus = GameManager.gameState.Over;
+            WebSocketManager.Instance.ILost();
+        }
+        _BallText.text = "x " + Up;
+    }
+
 
     private void PlayerCollision(GameObject P, Vector2 HitPosition)
     {
@@ -139,6 +156,7 @@ public class BallController : MonoBehaviour
     private void DeadZoneCollision(GameObject P)
     {
         _rb.velocity = Vector2.zero;
+        RemoveHealth(1);
         Spawn();
     }
 

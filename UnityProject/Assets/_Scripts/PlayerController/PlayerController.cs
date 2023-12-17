@@ -25,7 +25,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (GameManager.Instance.roomStatus == GameManager.gameState.Waiting)
+        if (GameManager.Instance?.roomStatus == GameManager.gameState.Waiting || GameManager.Instance?.roomStatus == GameManager.gameState.Over)
             return;
 
 
