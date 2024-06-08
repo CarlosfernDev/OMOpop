@@ -1,4 +1,4 @@
-# Forgotten Loop
+# OMOpop
 
 Proyecto de la asignatura Proyecto_2 de la carrera de videojuegos y experiencias interactivas de florida universitaria. <br>
 Url para descargar una versión ejecutable del juego: https://bo1x.itch.io/forgotten-loop <br>
