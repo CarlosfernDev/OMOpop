@@ -10,7 +10,7 @@ let FinishListRoom = new Map();
 let LoserListRoom = new Map();
 
 var MaxPlayers = 99;
-var Timer = 2;
+var Timer = 60;
 
 const ServerState = {
 	Offline: 0,
@@ -21,7 +21,7 @@ const ServerState = {
   };
 
 miservidor = new WebSocket.Server(
-	{port:3000},
+	{port:1337},
 	aliniciar
 );
 function aliniciar() {
@@ -210,6 +210,7 @@ return null;
 
 function LeavePublicRoom(conexiontemporal){
 	if (!publicRoom.has(ConexionRoom.get(conexiontemporal))) {
+		console.log("Regrese")
 		return;
 	}
 
@@ -373,6 +374,12 @@ function FinishMatch(ID,conexiontemporal){
 }
 
 function agregarPerdido(playerName, score, ID){
+
+	if (StateRoom.get(ID) == ServerState.Closing) {
+		return;
+	}
+
+
 	var scores = ScoreRoom.get(ID);
 
 	var jugador = scores.find(puntuacion => {
@@ -393,6 +400,8 @@ function agregarPerdido(playerName, score, ID){
 	FinishMatch(ID, playerName);
 
 	if(ScoreRoom.get(ID).length <= 1){
+		StateRoom.set(ID, ServerState.Closing);
+
 		ScoreRoom.get(ID).forEach(c => {
 			FinishListRoom.get(ID).push(c.playerName);
 			FinishMatch(ID, c.playerName);
@@ -406,41 +415,48 @@ function agregarPerdido(playerName, score, ID){
 
 function agregarPuntuacion(playerName, score, ID) {
 
-	var scores = ScoreRoom.get(ID);
-
-	var jugador = scores.find(puntuacion => {
-		return puntuacion.playerName == playerName;
-	});
-
-
-	if (jugador != null) {
-		scores = scores.filter(
-			(c)=>{
-				return c!=jugador
-			}
-		);
+	if (StateRoom.get(ID) == ServerState.Closing) {
+		return;
 	}
 
-	if(score <= 0){
-		ScoreRoom.set(ID, scores);
-		FinishListRoom.get(ID).push(playerName);
-		FinishMatch(ID, playerName);
+	var scores = ScoreRoom.get(ID);
+	try {
+		var jugador = scores.find(puntuacion => {
+			return puntuacion.playerName == playerName;
+		});
 
-		if(ScoreRoom.get(ID).length <= 1){
-			ScoreRoom.get(ID).forEach(c => {
-				FinishListRoom.get(ID).push(c.playerName);
-				FinishMatch(ID, c.playerName);
-			})
+
+		if (jugador != null) {
+			scores = scores.filter(
+				(c) => {
+					return c != jugador
+				}
+			);
 		}
-		else{
+
+		if (score <= 0) {
+			StateRoom.set(ID, ServerState.Closing);
+
+			ScoreRoom.set(ID, scores);
+			FinishListRoom.get(ID).push(playerName);
+			FinishMatch(ID, playerName);
+
+			if (ScoreRoom.get(ID).length <= 1) {
+				ScoreRoom.get(ID).forEach(c => {
+					FinishListRoom.get(ID).push(c.playerName);
+					FinishMatch(ID, c.playerName);
+				})
+			}
+			else {
+				obtenerPuntajeParaCadaJugador(ID);
+			}
+		} else {
+			scores.push({ playerName, score });
+			console.log(scores.length);
+			ScoreRoom.set(ID, scores);
 			obtenerPuntajeParaCadaJugador(ID);
 		}
-	}else{
-		scores.push({ playerName, score });
-		console.log(scores.length);
-		ScoreRoom.set(ID, scores);
-		obtenerPuntajeParaCadaJugador(ID);
-	}
+	} catch (e) { }
 }
 
 function obtenerPuntajeDeJugador(playerName, ID) {
@@ -463,6 +479,11 @@ function obtenerPuntajeDeJugador(playerName, ID) {
 }
 
 function obtenerPuntajeParaCadaJugador(ID) {
+
+	if (StateRoom.get(ID) == ServerState.Closing) {
+		return;
+	}
+
 
 	scores = ScoreRoom.get(ID);
 
@@ -494,6 +515,10 @@ function obtenerPuntajeParaCadaJugador(ID) {
 
 
 function restarPuntosAjugador(playerName, puntosARestar, ID) {
+	if (StateRoom.get(ID) == ServerState.Closing) {
+		return;
+	}
+
 	scores = ScoreRoom.get(ID);
 	var jugador = scores.find(puntuacion => {
 		return puntuacion.playerName == playerName;
@@ -513,6 +538,10 @@ function restarPuntosAjugador(playerName, puntosARestar, ID) {
 }
 
 function AddPuntosAjugador(playerName, puntosARestar, ID) {
+	if (StateRoom.get(ID) == ServerState.Closing) {
+		return;
+	}
+
 	scores = ScoreRoom.get(ID);
 	var jugador = scores.find(puntuacion => {
 		return puntuacion.playerName == playerName;

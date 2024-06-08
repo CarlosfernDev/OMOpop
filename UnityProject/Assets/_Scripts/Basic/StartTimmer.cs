@@ -39,6 +39,7 @@ public class StartTimmer : MonoBehaviour
         WebSocketManager.Instance.OnStartTimer += StartTimmerFunction;
         WebSocketManager.Instance.OnEndTimer += StandBy;
         WebSocketManager.Instance.OnStartMatch += EndTimmerFunction;
+        WebSocketManager.Instance.OnLocalPlayerChange += StandBy;
     }
 
     private void OnDisable()
@@ -46,6 +47,9 @@ public class StartTimmer : MonoBehaviour
         WebSocketManager.Instance.OnStartTimer -= StartTimmerFunction;
         WebSocketManager.Instance.OnEndTimer -= StandBy;
         WebSocketManager.Instance.OnStartMatch -= EndTimmerFunction;
+        WebSocketManager.Instance.OnLocalPlayerChange -= StandBy;
+        if (TimerRoutine != null)
+            StopCoroutine(TimerRoutine);
     }
 
     public void StartTimmerFunction(int value)
@@ -66,6 +70,24 @@ public class StartTimmer : MonoBehaviour
     public void StandBy()
     {
         isStandBy = true;
+
+        if (TimerRoutine != null)
+            StopCoroutine(TimerRoutine);
+
+        if (int.Parse(WebSocketManager.Instance.playersConnectedInRoom) <= 1)
+        {
+            _text.text = standbyText;
+        }
+        else
+        {
+            _text.text = standbyTextWithMore;
+        }
+    }
+
+    public void StandBy(string value)
+    {
+        if (!isStandBy)
+            return;
 
         if (TimerRoutine != null)
             StopCoroutine(TimerRoutine);

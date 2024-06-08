@@ -10,9 +10,17 @@ public class BlockLogic : MonoBehaviour
 
     public int ID;
 
+    [SerializeField] private GameObject BlockUI;
+
     [HideInInspector]public bool CanISend = true;
 
     [SerializeField] private TMP_Text _Text;
+
+    [SerializeField] private SpriteRenderer _Sprite;
+    [SerializeField] private Color StandarColor;
+    [SerializeField] private Color DisableColor;
+    [SerializeField] private Color SpawningColor;
+    [SerializeField] private Collider2D _Collider;
 
     //Funcion publica de restar vida y que compruebe la vida del bloque y otra donde lo haga desaparecer.
 
@@ -25,9 +33,17 @@ public class BlockLogic : MonoBehaviour
 
     private void OnEnable()
     {
-        TileBlock.BlocksNumber += 1;
-        vidaActual = vidaMaxima;
-        _Text.text = vidaActual.ToString();
+        if (CanISend)
+        {
+            _Sprite.color = StandarColor;
+            TileBlock.BlocksNumber += 1;
+            vidaActual = vidaMaxima;
+            _Text.text = vidaActual.ToString();
+        }
+        else
+        {
+            StartCoroutine(SetetingBlock());
+        }
         Debug.Log(TileBlock.BlocksNumber);
     }
 
@@ -47,11 +63,7 @@ public class BlockLogic : MonoBehaviour
 
     public void AddVida(int value)
     {
-        vidaActual = Mathf.Clamp(vidaActual + value, 0, 999);
-        _Text.text = vidaActual.ToString();
-        comprobarVida();
-        TileBlock.BlocksNumber += 1;
-        Debug.Log(TileBlock.BlocksNumber);
+        StartCoroutine(AddVidaRoutine(value));
     }
 
     public void RestarVida(int value)
@@ -67,6 +79,15 @@ public class BlockLogic : MonoBehaviour
 
     public void comprobarVida()
     {
+        if(vidaActual > 1)
+        {
+            BlockUI.SetActive(true);
+        }
+        else if(vidaActual == 1)
+        {
+            BlockUI.SetActive(false);
+        }
+
         // Verificar si la vida llegó a cero para romper el bloque
         if (vidaActual <= 0)
         {
@@ -86,5 +107,46 @@ public class BlockLogic : MonoBehaviour
             return;
 
         WebSocketManager.Instance.SendBlock(BlockMessage);
+    }
+
+    IEnumerator AddVidaRoutine(int value)
+    {
+        yield return new WaitForSeconds(1f);
+        vidaActual = Mathf.Clamp(vidaActual + value, 0, 999);
+        _Text.text = vidaActual.ToString();
+        comprobarVida();
+        TileBlock.BlocksNumber += 1;
+        Debug.Log(TileBlock.BlocksNumber);
+    }
+
+    IEnumerator SetetingBlock()
+    {
+        _Collider.enabled = false;
+        _Sprite.color = DisableColor;
+        float timereference = Time.time;
+        bool NewColor = false;
+        while (true)
+        {
+            if(timereference + 1 < Time.time)
+            {
+                break;
+            }
+
+            if (NewColor)
+            {
+                _Sprite.color = DisableColor;
+                NewColor = false;
+            }
+            else
+            {
+                _Sprite.color = SpawningColor;
+                NewColor = true;
+            }
+
+            yield return new WaitForSeconds(0.15f);
+        }
+        _Sprite.color = DisableColor;
+        TileBlock.BlocksNumber += 1;
+        _Collider.enabled = true;
     }
 }

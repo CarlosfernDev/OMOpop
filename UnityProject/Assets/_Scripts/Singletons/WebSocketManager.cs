@@ -162,7 +162,8 @@ public class WebSocketManager : MonoBehaviour
         _data.roomID = roomID;
         _data.user = username;
         _data.action = value;
-        ws.Send(JsonUtility.ToJson(_data));
+        ws.SendAsync((JsonUtility.ToJson(_data)), null);
+        ;
     }
 
     public void onSendMessageToAll()
@@ -174,7 +175,7 @@ public class WebSocketManager : MonoBehaviour
         _data.roomID = roomID;
         _data.user = username;
         _data.action = "onSendMessageToAll";
-        ws.Send(JsonUtility.ToJson(_data));
+        ws.SendAsync((JsonUtility.ToJson(_data)), null);
     }
 
     public void JoinPublicRoom()
@@ -187,7 +188,7 @@ public class WebSocketManager : MonoBehaviour
         _data.roomID = roomID;
         try
         {
-            ws.Send(JsonUtility.ToJson(_data));
+            ws.SendAsync((JsonUtility.ToJson(_data)), null);
         }
         catch (Exception)
         {
@@ -214,7 +215,7 @@ public class WebSocketManager : MonoBehaviour
         _data.roomID = roomID;
         _data.Json = JsonUtility.ToJson(value);
 
-        ws.Send(JsonUtility.ToJson(_data));
+        ws.SendAsync((JsonUtility.ToJson(_data)), null);
     }
 
     public void ILost()
@@ -226,7 +227,7 @@ public class WebSocketManager : MonoBehaviour
         _data.action = "ILost";
         _data.roomID = roomID;
 
-        ws.Send(JsonUtility.ToJson(_data));
+        ws.SendAsync((JsonUtility.ToJson(_data)), null);
     }
 
     public void SendBlockRemain(int value)
@@ -243,7 +244,7 @@ public class WebSocketManager : MonoBehaviour
 
         _data.Json = JsonUtility.ToJson(Class).ToString();
 
-        ws.Send(JsonUtility.ToJson(_data));
+        ws.SendAsync((JsonUtility.ToJson(_data)), null);
     }
 
     #endregion
@@ -383,9 +384,12 @@ public class WebSocketManager : MonoBehaviour
 
     private void SetPublicTimmer(string value)
     {
+        if (value == null)
+            return;
+
         if (OnStartTimer != null)
         {
-            OnStartTimer.Invoke(int.Parse(value));
+            OnStartTimer?.Invoke(int.Parse(value));
         }
         TimerValue = int.Parse(value);
     }
@@ -409,7 +413,7 @@ public class WebSocketManager : MonoBehaviour
     private void ReciveBlock(SendBlock value)
     {
         TileBlock.BlockIdDictionary[value.BlockID].CanISend = false;
-        StartCoroutine(GetBlock(TileBlock.BlockIdDictionary[value.BlockID]));
+        GetBlockFunction(TileBlock.BlockIdDictionary[value.BlockID]);
     }
 
     private void GetPing(string Ping)
@@ -433,9 +437,8 @@ public class WebSocketManager : MonoBehaviour
     #endregion
 
     #region Corutines
-    IEnumerator GetBlock(BlockLogic value)
+    void GetBlockFunction(BlockLogic value)
     {
-        yield return new WaitForSeconds(1f);
         if (TileBlock.BlocksNumber > 0)
         {
 

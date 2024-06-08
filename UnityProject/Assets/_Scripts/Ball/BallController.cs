@@ -18,7 +18,7 @@ public class BallController : MonoBehaviour
     bool isHittedY = false;
     bool isLaunched = false;
 
-    int Up = 3;
+    int Up = 4;
 
     [SerializeField] private TMP_Text _BallText;
 
@@ -47,7 +47,13 @@ public class BallController : MonoBehaviour
     private void FixedUpdate()
     {
         if (!isLaunched || GameManager.Instance.roomStatus == GameManager.gameState.Over)
+        {
+            if(GameManager.Instance.roomStatus == GameManager.gameState.Over)
+            {
+                _rb.velocity = Vector2.zero;
+            }
             return;
+        }
 
         _rb.velocity = new Vector2(Mathf.Sign(_rb.velocity.x) * Mathf.Clamp(Mathf.Abs(_rb.velocity.x),0.5f, _BallStats.initialSpeed - 0.5f), 
             Mathf.Sign(_rb.velocity.y) * Mathf.Clamp(Mathf.Abs(_rb.velocity.y), 0.5f, _BallStats.initialSpeed - 0.5f));
@@ -132,7 +138,7 @@ public class BallController : MonoBehaviour
             GameManager.Instance.roomStatus = GameManager.gameState.Over;
             WebSocketManager.Instance.ILost();
         }
-        _BallText.text = "x " + Up;
+        _BallText.text = "x " + Mathf.Clamp((Up-1), 0, 4);
     }
 
 

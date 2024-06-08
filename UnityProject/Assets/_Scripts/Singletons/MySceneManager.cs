@@ -41,11 +41,11 @@ public class MySceneManager : MonoBehaviour
 
     IEnumerator LoadCorutineFunction(int Value)
     {
-        //_myanimator.SetTrigger("Next");
+        _myanimator.SetTrigger("Next");
 
         while (true)
         {
-            //if (_myanimator.GetCurrentAnimatorStateInfo(0).IsName("1"))
+            if (_myanimator.GetCurrentAnimatorStateInfo(0).IsName("1"))
             break;
 
             yield return null;
@@ -67,11 +67,11 @@ public class MySceneManager : MonoBehaviour
 
         ChargeScene(Value);
 
-        //_myanimator.SetTrigger("Next");
+        _myanimator.SetTrigger("Next");
 
         while (true)
         {
-            //if (_myanimator.GetCurrentAnimatorStateInfo(0).IsName("0"))
+            if (_myanimator.GetCurrentAnimatorStateInfo(0).IsName("0"))
             break;
 
 
