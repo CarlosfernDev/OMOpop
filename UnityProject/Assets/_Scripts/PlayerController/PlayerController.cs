@@ -25,6 +25,10 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (GameManager.Instance?.roomStatus == GameManager.gameState.Waiting || GameManager.Instance?.roomStatus == GameManager.gameState.Over)
+            return;
+
+
         MovePrediction();
     }
 
@@ -82,7 +86,7 @@ public class PlayerController : MonoBehaviour
     // Referencia para inputs de un boton
     public void InputLaunch(InputAction.CallbackContext ctx)
     {
-        if (!ctx.performed)
+        if (!ctx.performed || GameManager.Instance.roomStatus == GameManager.gameState.Waiting)
         {
             return;
         }
